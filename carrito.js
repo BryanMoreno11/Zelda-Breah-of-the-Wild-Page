@@ -1,16 +1,64 @@
 //region atributos
+let usuario;
 const claveCarrito = "carrito";
 const claveCarritoDetalle = "carritoDetalle";
 const iva = 0.15;
-let carrito = { id_usuario: 0, subtotal: 0, iva: 0, total: 0, cantidad: 0 };
+let carrito = { subtotal: 0, iva: 0, total: 0, cantidad: 0 };
 let carritoDetalle = [];
 //region init
 cargarCarrito();
-console.log(
-  "El arreglo de productos carrito detalle al inicio es ",
-  carritoDetalle
-);
-console.log("El carrito es ", carrito);
+//region fireBase
+const firebaseConfig = {
+  apiKey: "AIzaSyCOfqLPDoHCP1E6ShROX7YYteBmn3NYB6M",
+  authDomain: "zelda-breath-of-the-wild-page.firebaseapp.com",
+  projectId: "zelda-breath-of-the-wild-page",
+  storageBucket: "zelda-breath-of-the-wild-page.appspot.com",
+  messagingSenderId: "953911522581",
+  appId: "1:953911522591:web:8d8ca0eb364d3febdd251c",
+};
+//region Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const batch = db.batch();
+
+auth.onAuthStateChanged((user) => {
+  let sesion = document.getElementById("sesion");
+  let cerrar = document.getElementById("cerrar");
+  if (user) {
+    sesion.classList.add("hidden");
+    cerrar.classList.remove("hidden");
+    usuario = {
+      email: user.email,
+      uid: user.uid,
+    };
+  } else {
+    usuario = null;
+    sesion.classList.remove("hidden");
+    cerrar.classList.add("hidden");
+  }
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  const toggleButton = document.querySelector(
+    '[data-collapse-toggle="navbar-default"]'
+  );
+  const navbarMenu = document.getElementById("navbar-default");
+
+  toggleButton.addEventListener("click", function () {
+    navbarMenu.classList.toggle("hidden");
+  });
+});
+
+function cerrar() {
+  auth.signOut()
+    .then(() => {
+      mostrarMensaje("Sesión cerrada", "¡Hasta luego!", "success");
+    })
+    .catch((error) => {
+      mostrarMensaje("Error al cerrar sesión", error.message, "error");
+    });
+}
 
 //region funciones
 function cargarLocalStorage(clave) {
@@ -39,11 +87,11 @@ function decrementarContador(id) {
   elementoHtml.value = valor;
 }
 
-function mostrarMensajeOculto(){
+function mostrarMensajeOculto() {
   let mensaje = document.getElementById("mensajeOculto");
-  if(carritoDetalle<=0){
+  if (carritoDetalle <= 0) {
     mensaje.classList.remove("hidden");
-  }else{
+  } else {
     mensaje.classList.add("hidden");
   }
 }
@@ -51,47 +99,67 @@ function mostrarMensajeOculto(){
 function cargarProductosHtml() {
   let contenedorProductos = document.getElementById("contenedorProductos");
   contenedorProductos.innerHTML = "";
-  if(carritoDetalle.length>0){
+  if (carritoDetalle.length > 0) {
     carritoDetalle.forEach((producto) => {
       contenedorProductos.innerHTML += `
             <div class="rounded-lg border border-gray-200  p-4 shadow-sm dark:border-gray-700 md:p-6 bg-amber-200 bg-opacity-80">
                 <div class="space-y-4 md:flex md:items-center md:justify-between md:gap-6 md:space-y-0">
                   <a href="#" class="shrink-0 md:order-1">
-                    <img class="hidden h-20 w-20 dark:block" src="${producto.imagen}" />
+                    <img class="hidden h-20 w-20 dark:block" src="${
+                      producto.imagen
+                    }" />
                   </a>
     
                   <label for="counter-input" class="sr-only">Choose quantity:</label>
                   <div class="flex items-center justify-between md:order-3 md:justify-end">
                     <div class="flex items-center">
-                      <button onclick="decrementarCantidad(${producto.id_producto})" type="button" id="decrement-button" data-input-counter-decrement="counter-input" class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 ">
+                      <button onclick="decrementarCantidad(${
+                        producto.id_producto
+                      })" type="button" id="decrement-button" data-input-counter-decrement="counter-input" class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 ">
                         <svg class="h-2.5 w-2.5 text-gray-900 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 2">
                           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h16" />
                         </svg>
                       </button>
-                      <input type="text" id="valor${producto.id_producto}" data-input-counter class="w-10 shrink-0 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 " placeholder="" value=${producto.cantidad} required 
+                      <input type="text" id="valor${
+                        producto.id_producto
+                      }" data-input-counter class="w-10 shrink-0 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 " placeholder="" value=${
+        producto.cantidad
+      } required 
                       
                        onblur="onFocusLeaveModificar(${producto.id_producto})"
                       />
-                      <button onclick="incrementarCantidad(${producto.id_producto})"   type="button" id="increment-button" data-input-counter-increment="counter-input" class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 ">
+                      <button onclick="incrementarCantidad(${
+                        producto.id_producto
+                      })"   type="button" id="increment-button" data-input-counter-increment="counter-input" class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 ">
                         <svg class="h-2.5 w-2.5 text-gray-900 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
                           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
                         </svg>
                       </button>
                     </div>
                     <div class="text-end md:order-4 md:w-64">
-                      <p class="text-base font-bold text-gray-900 ">Precio Unitario: $${producto.precio}</p>
-                      <p id="importeTexto${producto.id_producto}" class="text-base font-bold text-gray-900 ">Importe: $${producto.importe.toFixed(2)}</p>
+                      <p class="text-base font-bold text-gray-900 ">Precio Unitario: $${
+                        producto.precio
+                      }</p>
+                      <p id="importeTexto${
+                        producto.id_producto
+                      }" class="text-base font-bold text-gray-900 ">Importe: $${producto.importe.toFixed(
+        2
+      )}</p>
   
                     </div>
                   </div>
     
                   <div class="w-full min-w-0 flex-1 space-y-4 md:order-2 md:max-w-md">
-                    <p  class="text-base font-medium text-gray-900  ">${producto.nombre}</p>
+                    <p  class="text-base font-medium text-gray-900  ">${
+                      producto.nombre
+                    }</p>
     
                     <div class="flex items-center gap-4">
                      
     
-                      <button onclick="eliminar(${producto.id})" type="button" class="inline-flex items-center text-sm font-medium text-red-600 hover:underline dark:text-red-500">
+                      <button onclick="eliminar(${
+                        producto.id
+                      })" type="button" class="inline-flex items-center text-sm font-medium text-red-600 hover:underline dark:text-red-500">
                         <svg class="me-1.5 h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6" />
                         </svg>
@@ -120,7 +188,7 @@ function cargarCarritoHtml() {
   let contenedorCarrito = document.getElementById("contenedorCarrito");
   contenedorCarrito.innerHTML = "";
 
-  if(carritoDetalle.length>0){
+  if (carritoDetalle.length > 0) {
     contenedorCarrito.innerHTML += `
         <div class="space-y-4 rounded-lg border border-gray-200  p-4 shadow-sm dark:border-gray-700 bg-amber-200 bg-opacity-80 sm:p-6">
             <p class="text-xl font-semibold  ">Detalles de la compra</p>
@@ -159,9 +227,6 @@ function cargarCarritoHtml() {
           </div>
     `;
   }
-
-
-  
 }
 
 function onFocusLeaveModificar(id) {
@@ -184,40 +249,70 @@ function guardarLocalStorage(clave, valor) {
   localStorage.setItem(clave, JSON.stringify(valor));
 }
 
-function finalizarCompra(){
-  carritoDetalle = [];
-  carrito={ id_usuario: 0, subtotal: 0, iva: 0, total: 0, cantidad: 0 }
-  guardarLocalStorage(claveCarrito, carrito);
-  guardarLocalStorage(claveCarritoDetalle, carritoDetalle);
-  cargarProductosHtml();
-  cargarCarritoHtml();
-  mostrarMensajeOculto();
-  Swal.fire({
-    title: "Compra finalizada",
-    text: "¡Gracias por tu compra! Tu pedido ha sido procesado con éxito.",
-    icon: "success"
-  });
+function finalizarCompra() {
+  console.log("El usuario en la compra eses ", usuario);
+
+  if (usuario) {
+    carrito.usuario = usuario;
+    carrito.productos = carritoDetalle;
+    db.collection("carrito").add(carrito)
+    .then((docRef) => {
+      actualizarStock();
+      carritoDetalle = [];
+      carrito = { subtotal: 0, iva: 0, total: 0, cantidad: 0 };
+      guardarLocalStorage(claveCarrito, carrito);
+      guardarLocalStorage(claveCarritoDetalle, carritoDetalle);
+      cargarProductosHtml();
+      cargarCarritoHtml();
+      mostrarMensajeOculto();
+      Swal.fire({
+        title: "Compra finalizada",
+        text: "¡Gracias por tu compra! Tu pedido ha sido procesado con éxito.",
+        icon: "success",
+      });
+    })
+    .catch((error) => {
+      console.error("Error al añadir el carrito: ", error);
+    });
+
+  } else {
+    Swal.fire({
+      title: "Error",
+      text: "Debes iniciar sesión para finalizar la compra.",
+      icon: "warning",
+    });
+  }
 }
 
+
+function actualizarStock(){
+  carritoDetalle.forEach((producto) => {
+    const productoRef = db.collection("productos").doc(producto.id);
+    batch.update(productoRef, { stock: producto.stock-producto.cantidad });
+  });
+  batch.commit()
+    .then(() => {
+      console.log("Todos los productos fueron actualizados correctamente");
+    })
+    .catch((error) => {
+      console.error("Error al actualizar los productos: ", error);
+    });
+}
 
 function eliminar(id) {
   Swal.fire({
     title: "Eliminar producto",
     text: "¿Estás seguro de que deseas eliminar este producto del carrito?",
-    icon: "warning", 
+    icon: "warning",
     showCancelButton: true,
-    confirmButtonText: 'Sí, eliminar',
-    cancelButtonText: 'No, cancelar'
-}).then((result) => {
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "No, cancelar",
+  }).then((result) => {
     if (result.isConfirmed) {
       eliminarProductoCarrito(id);
-        Swal.fire(
-            'Eliminado!',
-            'El producto ha sido eliminado.',
-            'success'
-        );
-    } 
-});
+      Swal.fire("Eliminado!", "El producto ha sido eliminado.", "success");
+    }
+  });
 }
 
 function eliminarProductoCarrito(id) {
@@ -248,8 +343,6 @@ function actualizarImporte(id, cantidad, precioUnitario) {
   importeTexto.textContent = `Importe: $${importe.toFixed(2)}`; // Actualizar el contenido del <p> con el nuevo importe
 }
 
-
-
 function validarNumero(id) {
   id = parseInt(id, 10);
   let elementoHtml = document.getElementById("valor" + id);
@@ -268,8 +361,7 @@ function modificarProductoCarrito(id_producto) {
   let auxCantidad = productoCarrito.cantidad;
   if (productoCarrito) {
     productoCarrito.cantidad = cantidad;
-    productoCarrito.importe = 
-      productoCarrito.precio * productoCarrito.cantidad;
+    productoCarrito.importe = productoCarrito.precio * productoCarrito.cantidad;
   }
   if (validarStockProducto(id_producto, 0)) {
     calculosCarrito();

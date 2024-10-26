@@ -16,7 +16,7 @@ let productos = [
 const claveCarrito = "carrito";
 const claveCarritoDetalle = "carritoDetalle";
 const iva = 0.15;
-let carrito = { id_usuario: 0, subtotal: 0, iva: 0, total: 0, cantidad: 0 };
+let carrito = {  subtotal: 0, iva: 0, total: 0, cantidad: 0 };
 let carritoDetalle = [];
 cargarCarrito();
 //region funciones
@@ -177,6 +177,7 @@ function insertarProducto(id_producto) {
     let producto = obtenerProducto(id_producto);
     let importe = producto.precio * cantidad;
     let objProducto = {
+      id:producto.id,
       id_producto: id_producto,
       nombre: producto.nombre,
       imagen: producto.imagen,
@@ -267,8 +268,11 @@ function mostrarMensaje(titulo, mensaje, icono) {
 document.addEventListener("DOMContentLoaded", function () {
   obtenerDatos().then(() => {
     cargarProductosHtml();
+    console.log("El arreglo de productos es ", productos);
+
 
   });
+ 
 });
 
 
