@@ -1,73 +1,45 @@
-//region atributos
+const firebaseConfig = {
+  apiKey: "AIzaSyCOfqLPDoHCP1E6ShROX7YYteBmn3NYB6M",
+  authDomain: "zelda-breath-of-the-wild-page.firebaseapp.com",
+  projectId: "zelda-breath-of-the-wild-page",
+  storageBucket: "zelda-breath-of-the-wild-page.appspot.com",
+  messagingSenderId: "953911522581",
+  appId: "1:953911522591:web:8d8ca0eb364d3febdd251c"
+};
+// Inicializar Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 let productos = [
-  {
-    id_producto: 1,
-    nombre: "Link Jinete",
-    imagen:
-      "https://zelda.nintendo.com/breath-of-the-wild/assets/img/amiibo/amiibo-link-rider.png",
-    precio: 15.99,
-    stock: 50,
-  },
-  {
-    id_producto: 2,
-    nombre: "Zelda",
-    imagen:
-      "https://zelda.nintendo.com/breath-of-the-wild/assets/img/amiibo/amiibo-zelda.png",
-    precio: 14.99,
-    stock: 30,
-  },
-  {
-    id_producto: 3,
-    nombre: "Link arquero",
-    imagen:
-      "https://zelda.nintendo.com/breath-of-the-wild/assets/img/amiibo/amiibo-link-archer.png",
-    precio: 16.99,
-    stock: 40,
-  },
-  {
-    id_producto: 4,
-    nombre: "Revali",
-    imagen:
-      "https://zelda.nintendo.com/breath-of-the-wild/assets/img/amiibo/amiibo-revali.png",
-    precio: 17.99,
-    stock: 20,
-  },
-  {
-    id_producto: 5,
-    nombre: "Mipha",
-    imagen:
-      "https://zelda.nintendo.com/breath-of-the-wild/assets/img/amiibo/amiibo-mipha.png",
-    precio: 15.49,
-    stock: 25,
-  },
-  {
-    id_producto: 6,
-    nombre: "Urbosa",
-    imagen:
-      "https://zelda.nintendo.com/breath-of-the-wild/assets/img/amiibo/amiibo-urbosa.png",
-    precio: 18.99,
-    stock: 10,
-  },
-  {
-    id_producto: 7,
-    nombre: "Daruk",
-    imagen:
-      "https://zelda.nintendo.com/breath-of-the-wild/assets/img/amiibo/amiibo-daruk.png",
-    precio: 16.49,
-    stock: 35,
-  },
 ];
+
 const claveCarrito = "carrito";
 const claveCarritoDetalle = "carritoDetalle";
 const iva = 0.15;
 let carrito = { id_usuario: 0, subtotal: 0, iva: 0, total: 0, cantidad: 0 };
 let carritoDetalle = [];
 cargarCarrito();
-console.log("El arreglo de productos carrito detalle al inicio es ", carritoDetalle);
-
-//region init
-
 //region funciones
+async function obtenerDatos() {
+  try {
+      // Obtener la colección
+      const querySnapshot = await db.collection("productos").get();
+      
+      // Convertir la colección en un array de objetos
+      productos = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+      }));
+
+      console.log("Datos obtenidos:", arrayDeDatos);
+      return arrayDeDatos;
+      
+  } catch (error) {
+      console.error("Error al obtener los datos:", error);
+  }
+}
+
+
 function cargarProductosHtml() {
   let contenedorProductos = document.getElementById("contenedorProductos");
   productos.forEach((producto) => {
@@ -136,7 +108,7 @@ function cargarProductosHtml() {
 
 
 
-function incrementarContador(elementoHtml) {
+ function incrementarContador(elementoHtml) {
   let valor = parseInt(elementoHtml.value, 10);
   valor = isNaN(valor) ? 0 : valor;
   valor++;
@@ -293,8 +265,10 @@ function mostrarMensaje(titulo, mensaje, icono) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  cargarProductosHtml();
+  obtenerDatos().then(() => {
+    cargarProductosHtml();
 
+  });
 });
 
 
