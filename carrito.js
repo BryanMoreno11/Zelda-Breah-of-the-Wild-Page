@@ -37,6 +37,7 @@ auth.onAuthStateChanged((user) => {
     sesion.classList.remove("hidden");
     cerrar.classList.add("hidden");
   }
+  console.log(usuario);
 });
 
 document.addEventListener("DOMContentLoaded", function () {

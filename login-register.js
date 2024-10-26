@@ -45,7 +45,21 @@ async function loginFunction() {
       email,
       password
     );
-    mostrarMensaje("Inicio de sesión exitoso", "¡Bienvenido!", "success");
+    mostrarMensaje("Inicio de sesión exitoso", "¡Bienvenido!", "success").then((result) => {
+      if (result.isConfirmed) {
+        let carritoDetalle=localStorage.getItem("carritoDetalle");
+        carritoDetalle=JSON.parse(carritoDetalle);
+        if(carritoDetalle &&  carritoDetalle.length>0){
+          window.location.href = "./carrito.html";
+
+        }else{
+          window.location.href = "./amiibo.html";
+
+        }
+
+      }
+    });
+
     console.log("Usuario conectado:", userCredential.user);
   } catch (error) {
     mostrarMensaje("Error en el inicio de sesión", error.message, "error");
@@ -54,7 +68,7 @@ async function loginFunction() {
 }
 
 function mostrarMensaje(titulo, mensaje, icono) {
-  Swal.fire({
+  return Swal.fire({
     title: titulo,
     text: mensaje,
     icon: icono,
