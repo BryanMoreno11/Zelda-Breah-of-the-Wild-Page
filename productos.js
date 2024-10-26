@@ -175,7 +175,7 @@ function insertarProducto(id_producto) {
   );
   if (validarStockProducto(id_producto, cantidad)) {
     let producto = obtenerProducto(id_producto);
-    let importe = producto.precio * cantidad;
+    let importe = Math.round(producto.precio * cantidad*100)/100;
     let objProducto = {
       id:producto.id,
       id_producto: id_producto,

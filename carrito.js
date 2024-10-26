@@ -158,7 +158,7 @@ function cargarProductosHtml() {
                      
     
                       <button onclick="eliminar(${
-                        producto.id
+                        producto.id_producto
                       })" type="button" class="inline-flex items-center text-sm font-medium text-red-600 hover:underline dark:text-red-500">
                         <svg class="me-1.5 h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6" />
@@ -361,7 +361,7 @@ function modificarProductoCarrito(id_producto) {
   let auxCantidad = productoCarrito.cantidad;
   if (productoCarrito) {
     productoCarrito.cantidad = cantidad;
-    productoCarrito.importe = productoCarrito.precio * productoCarrito.cantidad;
+    productoCarrito.importe = Math.round(productoCarrito.precio * productoCarrito.cantidad*100)/100;
   }
   if (validarStockProducto(id_producto, 0)) {
     calculosCarrito();
